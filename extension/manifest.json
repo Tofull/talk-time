@@ -23,6 +23,7 @@
         "https://meet.google.com/*"
       ],
       "js": [
+        "resources/libraries/chart.umd.min.js",
         "content.js"
       ],
       "css": [
