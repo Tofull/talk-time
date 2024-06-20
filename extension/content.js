@@ -124,7 +124,7 @@ function createContainer() {
     <div class="talk-time-options-content">
       <h3>Options</h3>
       <p style="font-style:italic;">No options available at this time</p>
-      <p class="talk-time-export-json">Export JSON</p>
+      <button class="talk-time-export-json">Export JSON</button>
       <button class="talk-time-options-close">Close</button>
     </div>
     <div class="talk-time-header">
