@@ -124,7 +124,7 @@ function createContainer() {
     <div class="talk-time-options-content">
       <h3>Options</h3>
       <p style="font-style:italic;">No options available at this time</p>
-      <p class="talk-time-export-csv">Export CSV</p>
+      <p class="talk-time-export-json">Export JSON</p>
       <button class="talk-time-options-close">Close</button>
     </div>
     <div class="talk-time-header">
@@ -152,7 +152,7 @@ function createContainer() {
     dom_container.classList.add('talk-time-options');
   });
   onclick('.talk-time-options-close',()=>{ dom_container.classList.remove("talk-time-options"); });
-  onclick('.talk-time-export-csv',()=>{ 
+  onclick('.talk-time-export-json',()=>{ 
     console.table(data);
     const myJSON = JSON.stringify(data);
     console.log(myJSON);
