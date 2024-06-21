@@ -30,6 +30,7 @@ let dom_container = null;
 let dom_table = null;
 let dom_total = null;
 let chart_graph = null;
+let meeting_title = null;
 
 // Test data for screenshots
 // update_display_required = true;
@@ -553,6 +554,7 @@ function attach() {
       dom_container.style.display = "none";
       observer.disconnect();
       attached = false;
+      meeting_title = null;
     }
   }
   else {
@@ -569,6 +571,32 @@ function attach() {
         createContainer();
       }
       attached = true;
+    } else {
+      // If the participants list is not found, check if a meeting has started
+      
+      // Determine if a Google Meet meeting has started by checking the document title
+      const meetingTabTitle = document.title.startsWith('Meet – ');
+
+      // Get the meeting title - only exists when a user has joined a meeting
+      meeting_title = document.querySelector('div[data-meeting-title]')?.getAttribute('data-meeting-title');
+
+      const meetingStarted = meetingTabTitle && !!meeting_title
+      
+      // If a meeting has started, try to open the participants list
+      if (meetingStarted) {
+        // Find the button that toggles the participants list (with two "people" icons)
+        const buttons = document.querySelectorAll('button');
+        const targetButton = Array.from(buttons).find(button => {
+            const icons = button.querySelectorAll('i.google-symbols');
+            const peopleIcons = Array.from(icons).filter(icon => icon.textContent.trim() === 'people');
+            return peopleIcons.length === 2;
+        });
+
+        // Click the button if found
+        if (targetButton) {
+            targetButton.click();
+        }
+      }
     }
   }
 }
