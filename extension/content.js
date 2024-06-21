@@ -162,7 +162,11 @@ function createContainer() {
     console.table(data);
     const myJSON = JSON.stringify(data);
     console.log(myJSON);
-    downloadBlob(myJSON, 'export.json', 'text/csv;charset=utf-8;');
+
+    // date format YYYY-MM-DD
+    const todayDate = new Date().toISOString().split('T')[0];
+
+    downloadBlob(myJSON, `export-talktime-${todayDate}-${meeting_title}.json`, 'text/csv;charset=utf-8;');
   });
   onclick('.talk-time-export-graph', () => { 
     const totalsByName = {};
