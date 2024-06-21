@@ -575,7 +575,7 @@ function attach() {
       // If the participants list is not found, check if a meeting has started
       
       // Determine if a Google Meet meeting has started by checking the document title
-      const meetingTabTitle = document.title.startsWith('Meet – ');
+      const meetingTabTitle = /^Meet [-–].*/.test(document.title);
 
       // Get the meeting title - only exists when a user has joined a meeting
       meeting_title = document.querySelector('div[data-meeting-title]')?.getAttribute('data-meeting-title');
