@@ -32,6 +32,9 @@ let dom_total = null;
 let chart_graph = null;
 let meeting_title = null;
 
+// date format YYYY-MM-DD
+const todayDate = new Date().toISOString().split('T')[0];
+
 // Test data for screenshots
 // update_display_required = true;
 // data = {
@@ -127,6 +130,7 @@ function createContainer() {
       <h3>Options</h3>
       <p style="font-style:italic;">No options available at this time</p>
       <button class="talk-time-export-json">Export JSON</button>
+      <button class="talk-time-show-graph">Show Graph</button>
       <button class="talk-time-export-graph">Export Graph</button>
       <canvas id="chart-graph" width="400" height="400" style="display:none;"></canvas>
       <button class="talk-time-options-close">Close</button>
@@ -163,86 +167,22 @@ function createContainer() {
     const myJSON = JSON.stringify(data);
     console.log(myJSON);
 
-    // date format YYYY-MM-DD
-    const todayDate = new Date().toISOString().split('T')[0];
-
     downloadBlob(myJSON, `export-talktime-${todayDate}-${meeting_title}.json`, 'text/csv;charset=utf-8;');
   });
-  onclick('.talk-time-export-graph', () => { 
-    const totalsByName = {};
+  onclick('.talk-time-show-graph', () => { 
+    generateChartGraph();
+  });
+  onclick('.talk-time-export-graph', () => {
+    generateChartGraph();
+    const chart = document.getElementById('chart-graph');
+    const url = chart.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `export-talktime-${todayDate}-${meeting_title}.png`;
+    a.click();
 
-    // Aggregate totals by names
-    Object.values(data).forEach(item => {
-      const name = item.name;
-      const total = item.total;
-      if (!totalsByName[name]) {
-        totalsByName[name] = 0;
-      }
-      totalsByName[name] += total;
-    });
-  
-    // Extract names and aggregated totals
-    let names = Object.keys(totalsByName);
-    let totals = Object.values(totalsByName);
-
-    // Make totals between 0 and 100
-    const totalSum = totals.reduce((acc, val) => acc + val, 0);
-    totals = totals.map(val => Math.round(val / totalSum * 100));
-
-    // Display percentage in names with percentage
-    names = names.map((name, index) => `${name} (${totals[index]}%)`);
-
-    // Sort names and totals by totals descending
-    const sortedIndices = totals.map((_, index) => index).sort((a, b) => totals[b] - totals[a]);
-    names = sortedIndices.map(index => names[index]);
-    totals = sortedIndices.map(index => totals[index]);
-  
-    // Generate pie chart using Chart.js
-    // Destroy existing chart if it exists
-    if (chart_graph) {
-      chart_graph.destroy();
-    }
-    const ctx = document.getElementById('chart-graph').getContext('2d');
-    document.getElementById('chart-graph').style.display = 'block';
-    chart_graph = new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels: names,
-        datasets: [{
-          data: totals,
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(255, 206, 86, 0.2)',
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(153, 102, 255, 0.2)',
-            'rgba(255, 159, 64, 0.2)'
-          ],
-          borderColor: [
-            'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)'
-          ],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          title: {
-            display: true,
-            text: [meeting_title, 'Distribution of talk time by participants'],
-          },
-        },
-        showTooltips: true,
-        onAnimationComplete: function() {
-          this.showTooltip(this.datasets[0].points, true);
-        },
-      }
-    });
+    // drop the link
+    a.remove();
   });
 }
 
@@ -337,6 +277,85 @@ function getParticipantName(record) {
       record.name = spans[0].innerHTML;
     }
   }
+}
+
+// Generate a pie chart using Chart.js
+// -----------------------------------
+function generateChartGraph() {
+  const totalsByName = {};
+
+  // Aggregate totals by names
+  Object.values(data).forEach(item => {
+    const name = item.name;
+    const total = item.total;
+    if (!totalsByName[name]) {
+      totalsByName[name] = 0;
+    }
+    totalsByName[name] += total;
+  });
+
+  // Extract names and aggregated totals
+  let names = Object.keys(totalsByName);
+  let totals = Object.values(totalsByName);
+
+  // Make totals between 0 and 100
+  const totalSum = totals.reduce((acc, val) => acc + val, 0);
+  totals = totals.map(val => Math.round(val / totalSum * 100));
+
+  // Display percentage in names with percentage
+  names = names.map((name, index) => `${name} (${totals[index]}%)`);
+
+  // Sort names and totals by totals descending
+  const sortedIndices = totals.map((_, index) => index).sort((a, b) => totals[b] - totals[a]);
+  names = sortedIndices.map(index => names[index]);
+  totals = sortedIndices.map(index => totals[index]);
+
+  // Generate pie chart using Chart.js
+  // Destroy existing chart if it exists
+  if (chart_graph) {
+    chart_graph.destroy();
+  }
+  const ctx = document.getElementById('chart-graph').getContext('2d');
+  document.getElementById('chart-graph').style.display = 'block';
+  chart_graph = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: names,
+      datasets: [{
+        data: totals,
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.2)',
+          'rgba(54, 162, 235, 0.2)',
+          'rgba(255, 206, 86, 0.2)',
+          'rgba(75, 192, 192, 0.2)',
+          'rgba(153, 102, 255, 0.2)',
+          'rgba(255, 159, 64, 0.2)'
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: [meeting_title, 'Distribution of talk time by participants'],
+        },
+      },
+      showTooltips: true,
+      onAnimationComplete: function() {
+        this.showTooltip(this.datasets[0].points, true);
+      },
+    }
+  });
 }
 
 // ==================================================================
