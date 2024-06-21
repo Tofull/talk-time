@@ -172,8 +172,8 @@ function createContainer() {
   onclick('.talk-time-show-graph', () => { 
     generateChartGraph();
   });
-  onclick('.talk-time-export-graph', () => {
-    generateChartGraph();
+  onclick('.talk-time-export-graph', async () => {
+    await generateChartGraph();
     const chart = document.getElementById('chart-graph');
     const url = chart.toDataURL('image/png');
     const a = document.createElement('a');
@@ -281,7 +281,7 @@ function getParticipantName(record) {
 
 // Generate a pie chart using Chart.js
 // -----------------------------------
-function generateChartGraph() {
+async function generateChartGraph() {
   const totalsByName = {};
 
   // Aggregate totals by names
@@ -317,44 +317,46 @@ function generateChartGraph() {
   }
   const ctx = document.getElementById('chart-graph').getContext('2d');
   document.getElementById('chart-graph').style.display = 'block';
-  chart_graph = new Chart(ctx, {
-    type: 'pie',
-    data: {
-      labels: names,
-      datasets: [{
-        data: totals,
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.2)',
-          'rgba(54, 162, 235, 0.2)',
-          'rgba(255, 206, 86, 0.2)',
-          'rgba(75, 192, 192, 0.2)',
-          'rgba(153, 102, 255, 0.2)',
-          'rgba(255, 159, 64, 0.2)'
-        ],
-        borderColor: [
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)'
-        ],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        title: {
-          display: true,
-          text: [meeting_title, 'Distribution of talk time by participants'],
+
+  await new Promise((resolve) => {
+    chart_graph = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: names,
+        datasets: [{
+          data: totals,
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(255, 206, 86, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(153, 102, 255, 0.2)',
+            'rgba(255, 159, 64, 0.2)'
+          ],
+          borderColor: [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        animations: false,
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: [meeting_title, 'Distribution of talk time by participants'],
+          },
         },
-      },
-      showTooltips: true,
-      onAnimationComplete: function() {
-        this.showTooltip(this.datasets[0].points, true);
-      },
-    }
+        showTooltips: true,
+      }
+    });
+    resolve();
   });
 }
 
