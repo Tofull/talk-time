@@ -132,6 +132,8 @@ function createContainer() {
       <button class="talk-time-options-close">Close</button>
     </div>
     <div class="talk-time-header">
+      <div>${meeting_title}</div>
+      <hr/>
       <div class="talk-time-show-groups">Show Groups</div>
       <div class="talk-time-hide-groups">Hide Groups</div>
       <div class="talk-time-summary">Total Talk Time: <span id="talk-time-summary-total"></span></div>
@@ -228,7 +230,7 @@ function createContainer() {
         plugins: {
           title: {
             display: true,
-            text: 'Distribution of speaking time by participants'
+            text: [meeting_title, 'Distribution of talk time by participants'],
           },
         },
         showTooltips: true,
